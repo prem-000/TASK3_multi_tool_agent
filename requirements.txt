@@ -1,0 +1,7 @@
+
+langchain>=1.0.0
+langchain-google-genai>=4.0.0
+ddgs>=9.0.0
+python-dotenv>=1.0.0
+streamlit>=1.40.0
+pytest>=8.0.0

@@ -1,0 +1,4 @@
+Project: Multi-Tool Autonomous AI Agent
+Purpose: Demonstrate autonomous web search, mathematical calculations,
+and local file reading.
+Target demo date: 30 October 2026.
