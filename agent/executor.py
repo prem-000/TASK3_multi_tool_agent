@@ -9,6 +9,7 @@ from tools.calculator import calculator
 from tools.file_reader import read_local_file
 from tools.web_search import web_search
 
+
 REQUIRED_TOOLS = {
     "web_search",
     "calculator",
@@ -17,24 +18,28 @@ REQUIRED_TOOLS = {
 
 
 def build_agent(settings: Settings):
-    """Create the Gemini-powered LangChain agent."""
+    """Build the Gemini-powered LangChain agent."""
     model = ChatGoogleGenerativeAI(
         model=settings.model,
         temperature=0,
-        google_api_key=settings.api_key,
-        timeout=45,
+        timeout=120,
         max_retries=1,
+        google_api_key=settings.api_key,
     )
 
     return create_agent(
         model=model,
-        tools=[web_search, calculator, read_local_file],
+        tools=[
+            web_search,
+            calculator,
+            read_local_file,
+        ],
         system_prompt=SYSTEM_PROMPT,
     )
 
 
 def run_agent(agent, messages):
-    """Execute a user request and return the complete message trace."""
+    """Execute the agent and return its messages and tool trace."""
     if not messages:
         raise ValueError("At least one message is required.")
 
@@ -45,31 +50,28 @@ def run_agent(agent, messages):
 
 
 def content_to_text(content) -> str:
-    """Convert model content blocks into displayable text."""
+    """Convert model content into displayable text."""
     if isinstance(content, str):
         return content
 
     if isinstance(content, list):
         parts = []
-
         for item in content:
             if isinstance(item, dict) and item.get("text"):
                 parts.append(item["text"])
             else:
                 parts.append(str(item))
-
         return "\n".join(parts)
 
     return str(content)
 
 
 def extract_final_answer(messages) -> str:
-    """Extract the final assistant message after the tool loop finishes."""
+    """Extract the final assistant response."""
     for message in reversed(messages):
         if isinstance(message, AIMessage):
             if not (getattr(message, "tool_calls", None) or []):
                 answer = content_to_text(message.content).strip()
-
                 if answer:
                     return answer
 
@@ -77,7 +79,7 @@ def extract_final_answer(messages) -> str:
 
 
 def extract_trace(messages) -> list:
-    """Create a visible log of tool actions and tool observations."""
+    """Return visible tool actions and observations."""
     trace = []
 
     for message in messages:
